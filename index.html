@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Les Geoffroy-Lafond</title>
+<style>
+:root{
+  --fond:#f6f1e7; --papier:#fffdf8; --encre:#2b2420; --doux:#6f6359; --trait:#d9cdbb;
+  --accent:#7a4a2a; --accent-doux:#efe2d0; --f:#a0526a; --m:#3f6b8c; --focus:#fff4e2;
+  --ombre:0 1px 2px rgba(60,40,20,.08),0 2px 8px rgba(60,40,20,.06);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{--fond:#1c1915;--papier:#262119;--encre:#efe6d8;--doux:#b3a593;--trait:#463d32;
+    --accent:#e0a878;--accent-doux:#3a2f24;--f:#e08aa3;--m:#86b3d6;--focus:#3b3023;
+    --ombre:0 1px 2px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.25);}
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--encre);font-family:var(--sans);font-size:15px;line-height:1.45}
+a{color:var(--accent)}
+button,input{font:inherit;color:inherit}
+.prive-banniere{background:#7a2a2a;color:#fff;text-align:center;font-size:12px;padding:4px 8px;letter-spacing:.02em}
+header{background:var(--papier);border-bottom:1px solid var(--trait);position:sticky;top:0;z-index:20}
+.entete{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+h1{font-family:var(--serif);font-weight:600;font-size:24px;margin:0;letter-spacing:.01em;cursor:pointer;white-space:nowrap}
+h1 small{display:block;font-family:var(--sans);font-size:12px;font-weight:400;color:var(--doux);letter-spacing:0}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{border:1px solid transparent;background:none;padding:6px 12px;border-radius:999px;cursor:pointer;color:var(--doux)}
+nav button:hover{background:var(--accent-doux);color:var(--encre)}
+nav button[aria-current="true"]{background:var(--accent);color:var(--papier)}
+.recherche{position:relative;margin-left:auto;flex:1 1 220px;max-width:340px}
+.recherche input{width:100%;padding:8px 12px;border:1px solid var(--trait);border-radius:999px;background:var(--fond)}
+.recherche input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.resultats{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--papier);border:1px solid var(--trait);border-radius:10px;box-shadow:var(--ombre);max-height:60vh;overflow:auto;display:none}
+.resultats.ouvert{display:block}
+.resultats button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 12px;cursor:pointer}
+.resultats button:hover,.resultats button.actif{background:var(--accent-doux)}
+.resultats .an{color:var(--doux);font-size:12px;margin-left:6px}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 48px}
+.grille{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+@media (max-width:900px){.grille{grid-template-columns:1fr}}
+.rangee{margin:0 0 6px}
+.rangee h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--doux);font-weight:600;margin:0 0 6px;text-align:center}
+.groupes{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+.groupe{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;position:relative}
+.groupe-etiquette{width:100%;text-align:center;font-size:11px;color:var(--doux)}
+.connecteur{height:22px;display:flex;justify-content:center}
+.connecteur::before{content:"";width:1px;background:var(--trait)}
+.carte{background:var(--papier);border:1px solid var(--trait);border-left:4px solid var(--trait);border-radius:8px;padding:8px 12px;min-width:150px;max-width:220px;cursor:pointer;box-shadow:var(--ombre);text-align:left;transition:transform .12s, border-color .12s}
+.carte:hover{transform:translateY(-1px);border-color:var(--accent)}
+.carte:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.carte.F{border-left-color:var(--f)} .carte.M{border-left-color:var(--m)}
+.carte .prenom{font-weight:600;display:block}
+.carte .nom{font-family:var(--serif);display:block}
+.carte .dates{display:block;font-size:12px;color:var(--doux);margin-top:2px}
+.carte.masque{cursor:default;border-style:dashed;border-left-width:1px;color:var(--doux);font-style:italic;box-shadow:none;background:transparent}
+.carte.masque:hover{transform:none;border-color:var(--trait)}
+.carte.vide{cursor:default;border-style:dashed;border-left-width:1px;color:var(--doux);box-shadow:none;background:transparent;font-size:13px}
+.carte.vide:hover{transform:none;border-color:var(--trait)}
+.carte.centre{background:var(--focus);border-color:var(--accent);min-width:200px;padding:12px 16px}
+.carte.centre .nom{font-size:20px}
+.centre-rang{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap}
+.union{font-size:12px;color:var(--doux);text-align:center;padding:0 4px}
+.union b{display:block;font-size:18px;color:var(--accent);font-family:var(--serif)}
+.panneau{background:var(--papier);border:1px solid var(--trait);border-radius:12px;padding:18px;box-shadow:var(--ombre);position:sticky;top:90px}
+@media (max-width:900px){.panneau{position:static}}
+.panneau h2{font-family:var(--serif);font-size:22px;margin:0 0 2px;font-weight:600}
+.panneau .sous{color:var(--doux);margin:0 0 14px;font-size:13px}
+.panneau dl{margin:0;font-size:14px}
+.panneau dt{color:var(--doux);font-size:12px;margin-top:10px}
+.panneau dt:first-child{margin-top:0}
+.panneau dd{margin:0}
+.panneau h4{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--doux);margin:16px 0 6px}
+.panneau ul{margin:0;padding-left:18px}
+.puce{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent-doux);margin:0 4px 4px 0}
+.lienp{background:var(--accent-doux);border-radius:8px;padding:8px 10px;font-size:14px;margin-top:10px}
+.medias{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.medias a{display:block;font-size:11px;color:var(--doux);text-decoration:none}
+.medias img{width:100%;aspect-ratio:3/4;object-fit:cover;border:1px solid var(--trait);border-radius:4px;background:#fff}
+.lien-nom{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.btn{border:1px solid var(--trait);background:var(--papier);padding:6px 12px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+/* Ascendance */
+.asc-outils{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;color:var(--doux);font-size:13px}
+.asc-cadre{overflow:auto;background:var(--papier);border:1px solid var(--trait);border-radius:12px;padding:12px}
+.asc{position:relative}
+.asc svg{position:absolute;inset:0;pointer-events:none}
+.asc .carte{display:flex;flex-direction:column;justify-content:center;overflow:hidden;line-height:1.25}
+.asc .carte .prenom,.asc .carte .nom{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.asc .carte .dates{font-size:11px;margin-top:1px}
+.asc .compact .prenom,.asc .compact .nom{display:inline}
+.asc .compact .nom::before{content:" "}
+.asc .compact{display:block;padding-top:6px!important}
+.asc .compact .dates{display:block}
+/* Lien */
+.lien-form{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:end;background:var(--papier);border:1px solid var(--trait);border-radius:12px;padding:16px}
+@media (max-width:640px){.lien-form{grid-template-columns:1fr}}
+.lien-form label{font-size:12px;color:var(--doux);display:block;margin-bottom:4px}
+.lien-form .recherche{max-width:none;margin:0}
+.lien-res{margin-top:18px}
+.lien-phrase{font-family:var(--serif);font-size:22px;text-align:center;margin:10px 0 18px}
+.chemins{display:flex;justify-content:center;gap:28px;flex-wrap:wrap}
+.chemin{display:flex;flex-direction:column;align-items:center;gap:0}
+.chemin .connecteur{height:16px}
+.sommet{display:flex;flex-direction:column;align-items:center;margin-bottom:0}
+/* Index */
+.idx-outils{display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.idx-outils input{padding:8px 12px;border:1px solid var(--trait);border-radius:8px;background:var(--papier);min-width:240px}
+.idx{columns:3 260px;column-gap:28px}
+.idx section{break-inside:avoid;margin-bottom:16px}
+.idx h3{font-family:var(--serif);font-size:18px;margin:0 0 4px;border-bottom:1px solid var(--trait);padding-bottom:2px}
+.idx h3 small{color:var(--doux);font-family:var(--sans);font-size:12px;font-weight:400}
+.idx button{display:block;background:none;border:0;padding:2px 0;cursor:pointer;text-align:left;width:100%}
+.idx button:hover{color:var(--accent)}
+.idx .an{color:var(--doux);font-size:12px}
+.note{color:var(--doux);font-size:13px}
+footer{max-width:1200px;margin:0 auto;padding:0 16px 32px;color:var(--doux);font-size:12px;text-align:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div id="banniere"></div>
+<header>
+  <div class="entete">
+    <h1 id="titre" tabindex="0"><span id="titre-txt"></span><small id="sous-titre"></small></h1>
+    <nav id="nav" aria-label="Vues">
+      <button data-vue="famille">Famille</button>
+      <button data-vue="ascendance">Ascendance</button>
+      <button data-vue="lien">Lien de parenté</button>
+      <button data-vue="index">Index</button>
+    </nav>
+    <div class="recherche" id="recherche-entete"></div>
+  </div>
+</header>
+<main id="contenu"></main>
+<footer id="pied"></footer>
+<script>
+const ARBRE = {"meta":{"titre":"Les Geoffroy-Lafond","personne_depart":"P0002"},"personnes":{"P0001":{"id":"P0001","masque":true},"P0002":{"id":"P0002","prenom":"Mathieu","nom":"Lemaire-Lafond","sexe":"M"},"P0003":{"id":"P0003","prenom":"Caroline","nom":"Geoffroy","sexe":"F"},"P0004":{"id":"P0004","prenom":"André","nom":"Lafond","sexe":"M"},"P0005":{"id":"P0005","prenom":"Sylvie","nom":"Lemaire","sexe":"F"},"P0006":{"id":"P0006","prenom":"Marc","nom":"Gagnon","sexe":"M"},"P0007":{"id":"P0007","prenom":"Marc-Olivier","nom":"Gagnon","sexe":"M"},"P0008":{"id":"P0008","prenom":"Carole","nom":"Mireault","sexe":"F"},"P0009":{"id":"P0009","prenom":"Lucien","nom":"Lafond","sexe":"M"},"P0010":{"id":"P0010","prenom":"Lucienne","nom":"Arbour","sexe":"F"},"P0011":{"id":"P0011","prenom":"Henri-Paul","nom":"Lemaire","sexe":"M"},"P0012":{"id":"P0012","prenom":"Pierrette","nom":"Gélinas","sexe":"F"},"P0013":{"id":"P0013","prenom":"Pierre","nom":"Geoffroy","sexe":"M"},"P0014":{"id":"P0014","prenom":"Gisèle","nom":"Paré","sexe":"F"},"P0015":{"id":"P0015","prenom":"Roland","nom":"Geoffroy","sexe":"M"},"P0016":{"id":"P0016","prenom":"Rollande","nom":"Diotte","sexe":"F"},"P0017":{"id":"P0017","prenom":"Pierre-André","nom":"Geoffroy","sexe":"M"},"P0018":{"id":"P0018","prenom":"Cécile","nom":"Lafond","sexe":"F"},"P0019":{"id":"P0019","prenom":"Roland","nom":"Massicotte","sexe":"M"},"P0020":{"id":"P0020","prenom":"Anonyme","nom":"Lafond","sexe":"F"},"P0021":{"id":"P0021","prenom":"Réal","nom":"Lafond","sexe":"M"},"P0022":{"id":"P0022","prenom":"Hélène","nom":"Lafond","sexe":"F"},"P0023":{"id":"P0023","prenom":"Albert","nom":"Perreault","sexe":"M"},"P0024":{"id":"P0024","prenom":"Marcel","nom":"Lafond","sexe":"M"},"P0025":{"id":"P0025","prenom":"Lise","nom":"Perreault","sexe":"F"},"P0026":{"id":"P0026","prenom":"Gisèle","nom":"Lafond","sexe":"F"},"P0027":{"id":"P0027","prenom":"Gaétan","nom":"Coderre","sexe":"M"},"P0028":{"id":"P0028","prenom":"Monique","nom":"Lafond","sexe":"F"},"P0029":{"id":"P0029","prenom":"Raymonde","nom":"Lafond","sexe":"F"},"P0030":{"id":"P0030","prenom":"Charles","nom":"Lapointe","sexe":"M"},"P0031":{"id":"P0031","prenom":"Fernand","nom":"Lafond","sexe":"M"},"P0032":{"id":"P0032","prenom":"Virginie","nom":"Marion","sexe":"F"},"P0033":{"id":"P0033","prenom":"Emery","nom":"Arbour","sexe":"M"},"P0034":{"id":"P0034","prenom":"Pierre","nom":"Arbour","sexe":"M"},"P0035":{"id":"P0035","prenom":"Edwige","nom":"Laforest","sexe":"F"},"P0036":{"id":"P0036","prenom":"Sinaï","nom":"Marion","sexe":"M"},"P0037":{"id":"P0037","prenom":"Virgine","nom":"Morin","sexe":"F"},"P0038":{"id":"P0038","prenom":"Joseph","nom":"Marion","sexe":"M"},"P0039":{"id":"P0039","prenom":"Denise","nom":"Chartier","sexe":"F"},"P0040":{"id":"P0040","prenom":"Mathilde","nom":"Chartier","sexe":"F"},"P0041":{"id":"P0041","prenom":"Azéline","nom":"Latendresse","sexe":"F"},"P0042":{"id":"P0042","prenom":"Marie-Louise","nom":"Rivest","sexe":"F"},"P0043":{"id":"P0043","prenom":"Bernard","nom":"Lapointe","sexe":"M"},"P0044":{"id":"P0044","prenom":"Etienne","nom":"Lapointe","sexe":"M"},"P0045":{"id":"P0045","masque":true},"P0046":{"id":"P0046","masque":true},"P0047":{"id":"P0047","prenom":"Louisse","nom":"Massicotte","sexe":"F"},"P0048":{"id":"P0048","prenom":"Marc-André","nom":"Boivin","sexe":"M"},"P0049":{"id":"P0049","prenom":"Jessica","nom":"Chevrette","sexe":"F"},"P0050":{"id":"P0050","prenom":"Carole","nom":"Lafond","sexe":"F"},"P0051":{"id":"P0051","prenom":"Alain","nom":"Toupain","sexe":"M"},"P0052":{"id":"P0052","prenom":"Olivier","nom":"Toupain","sexe":"M"},"P0053":{"id":"P0053","prenom":"Maryse","nom":"Lafond","sexe":"F"},"P0054":{"id":"P0054","prenom":"Alain","nom":"Thibodeau","sexe":"M"},"P0055":{"id":"P0055","prenom":"Pascal","nom":"Thibodeau","sexe":"M"},"P0056":{"id":"P0056","prenom":"Rosalie","nom":"Thibodeau","sexe":"F"},"P0057":{"id":"P0057","prenom":"Ghislaine","nom":"Lafond","sexe":"F"},"P0058":{"id":"P0058","prenom":"Gaetan","nom":"Gaudet","sexe":"M"},"P0059":{"id":"P0059","prenom":"Samuel","nom":"Gaudet","sexe":"M"},"P0060":{"id":"P0060","prenom":"Maxime","nom":"Gaudet","sexe":"M"},"P0061":{"id":"P0061","prenom":"Francois","nom":"Venne","sexe":"M"},"P0062":{"id":"P0062","prenom":"Benjamin","nom":"Venne","sexe":"M"},"P0063":{"id":"P0063","prenom":"Philippe","nom":"Lafond","sexe":"M"},"P0064":{"id":"P0064","prenom":"William","nom":"Lafond","sexe":"M"},"P0065":{"id":"P0065","prenom":"Réal","nom":"Lafond","sexe":"M"},"P0066":{"id":"P0066","prenom":"France","nom":"Prévost","sexe":"F"},"P0067":{"id":"P0067","prenom":"Mylène","nom":"Lafond","sexe":"F"},"P0068":{"id":"P0068","prenom":"Tommy","nom":"Lafond","sexe":"M"},"P0069":{"id":"P0069","prenom":"Marie","nom":"Coderre","sexe":"F"},"P0070":{"id":"P0070","prenom":"Simon","sexe":"M"},"P0071":{"id":"P0071","prenom":"Francois","nom":"Coderre","sexe":"M"},"P0072":{"id":"P0072","prenom":"Mirielle","nom":"Boucher","sexe":"F"},"P0073":{"id":"P0073","prenom":"Roxanne","nom":"Coderre","sexe":"F"},"P0074":{"id":"P0074","prenom":"Johanne","nom":"Perreault","sexe":"F"},"P0075":{"id":"P0075","prenom":"Serge","nom":"Marino","sexe":"M"},"P0076":{"id":"P0076","prenom":"Marie-Claude","nom":"Perreault","sexe":"F"},"P0077":{"id":"P0077","prenom":"Yves","nom":"Desmarais","sexe":"M"},"P0078":{"id":"P0078","prenom":"Marie-Élaine","nom":"Desmarais","sexe":"F"},"P0079":{"id":"P0079","prenom":"Emmanuelle","nom":"Desmarais","sexe":"F"},"P0080":{"id":"P0080","prenom":"Simon","nom":"Desmarais","sexe":"M"},"P0081":{"id":"P0081","prenom":"Danielle","nom":"Perreault","sexe":"F"},"P0082":{"id":"P0082","prenom":"Gilles","nom":"Gratton","sexe":"M"},"P0083":{"id":"P0083","prenom":"Louis-Olivier","nom":"Gratton","sexe":"M"},"P0084":{"id":"P0084","prenom":"Charles","nom":"Gratton","sexe":"M"},"P0085":{"id":"P0085","prenom":"Joël","nom":"Perreault","sexe":"M"},"P0086":{"id":"P0086","prenom":"Josée","nom":"Mercure","sexe":"F"},"P0087":{"id":"P0087","prenom":"Samantha","nom":"Perreault-Mercure","sexe":"F"},"P0088":{"id":"P0088","prenom":"Jacynthe","nom":"Perreault","sexe":"F"},"P0089":{"id":"P0089","prenom":"Christian","nom":"Sirard","sexe":"M"},"P0090":{"id":"P0090","prenom":"Jean","nom":"Francoeur","sexe":"M"},"P0091":{"id":"P0091","prenom":"Amélie","nom":"Perreault-Francoeur","sexe":"F"},"P0092":{"id":"P0092","prenom":"Mario","nom":"Perreault","sexe":"M"},"P0093":{"id":"P0093","prenom":"Guylaine","nom":"Lépine","sexe":"F"},"P0094":{"id":"P0094","prenom":"Alex","nom":"Perreault","sexe":"M"},"P0095":{"id":"P0095","prenom":"Ève","nom":"Perreault","sexe":"F"},"P0096":{"id":"P0096","prenom":"Joseph","nom":"Lafond","sexe":"M"},"P0097":{"id":"P0097","prenom":"Eva","nom":"Payette","sexe":"F"},"P0098":{"id":"P0098","prenom":"Maurice","nom":"Lafond","sexe":"M"},"P0099":{"id":"P0099","prenom":"Gisèle","nom":"Groulx","sexe":"F"},"P0100":{"id":"P0100","prenom":"Jules","nom":"Lafond","sexe":"M"},"P0101":{"id":"P0101","prenom":"Caroline","nom":"Desrochers","sexe":"F"},"P0102":{"id":"P0102","prenom":"Joseph","nom":"Desrochers","sexe":"M"},"P0103":{"id":"P0103","prenom":"Judith","nom":"Landry","sexe":"F"},"P0104":{"id":"P0104","prenom":"Julienne","nom":"Venne","sexe":"F"},"P0105":{"id":"P0105","prenom":"Isaac","nom":"Venne","sexe":"M"},"P0106":{"id":"P0106","prenom":"Elmire","nom":"Richard","sexe":"F"},"P0107":{"id":"P0107","prenom":"Charles","nom":"Lafond","sexe":"M"},"P0108":{"id":"P0108","prenom":"Louise","nom":"Germain-Bélisle","sexe":"F"},"P0109":{"id":"P0109","prenom":"Jean-Baptiste","nom":"Germain-Bélisle","sexe":"M"},"P0110":{"id":"P0110","prenom":"Thérèse","nom":"Douvier-Lamarche","sexe":"F"},"P0111":{"id":"P0111","prenom":"Pierre","nom":"Personne-Lafond","sexe":"M"},"P0112":{"id":"P0112","prenom":"Marie-Rose","nom":"Ethier","sexe":"F"},"P0113":{"id":"P0113","prenom":"Claude","nom":"Ethier","sexe":"M"},"P0114":{"id":"P0114","prenom":"Madeleine","nom":"Robillard","sexe":"F"},"P0115":{"id":"P0115","prenom":"Charles","nom":"Personne-Lafond","sexe":"M"},"P0116":{"id":"P0116","prenom":"Agathe","nom":"Chagnon","sexe":"F"},"P0117":{"id":"P0117","prenom":"Raymond","nom":"Chagnon","sexe":"M"},"P0118":{"id":"P0118","prenom":"Madeleine","nom":"Pelletier","sexe":"F"},"P0119":{"id":"P0119","prenom":"Nicolas","nom":"Personne-Lafond","sexe":"M"},"P0120":{"id":"P0120","prenom":"Madeleine","nom":"vacher-Lacerte","sexe":"F"},"P0121":{"id":"P0121","prenom":"Jean-Guy","nom":"Vacher dit Lacerte","sexe":"M"},"P0122":{"id":"P0122","prenom":"Anne","nom":"Benoit","sexe":"F"},"P0123":{"id":"P0123","prenom":"Pierre","nom":"Personne-Lafond","sexe":"M"},"P0124":{"id":"P0124","prenom":"Jeanne","nom":"Ferrand","sexe":"F"},"P0125":{"id":"P0125","prenom":"Anatole","nom":"Lafond","sexe":"M"},"P0126":{"id":"P0126","prenom":"Albertine","nom":"Garreau","sexe":"F"},"P0127":{"id":"P0127","prenom":"Alphonse","nom":"Geoffroy","sexe":"M"},"P0128":{"id":"P0128","prenom":"Zénaide","nom":"Coutu","sexe":"F"},"P0129":{"id":"P0129","prenom":"Dieudonné","nom":"Geoffroy","sexe":"M"},"P0130":{"id":"P0130","prenom":"Mérélise","nom":"Nault","sexe":"F"},"P0131":{"id":"P0131","prenom":"Narcisse","nom":"Geoffroy","sexe":"M"},"P0132":{"id":"P0132","prenom":"Henriette","nom":"Desrosiers","sexe":"F"},"P0133":{"id":"P0133","prenom":"François","nom":"Geoffroy","sexe":"M"},"P0134":{"id":"P0134","prenom":"Élisabeth","nom":"Tessier","sexe":"F"},"P0135":{"id":"P0135","prenom":"Remy","nom":"Geoffroy","sexe":"M"},"P0136":{"id":"P0136","prenom":"Angélique","nom":"Rivest","sexe":"F"},"P0137":{"id":"P0137","prenom":"Adalbert","nom":"Groulx","sexe":"M"},"P0138":{"id":"P0138","prenom":"Laurentia","nom":"Coursol","sexe":"F"},"P0139":{"id":"P0139","prenom":"Onézime","nom":"Payette","sexe":"M"},"P0140":{"id":"P0140","prenom":"Justine","nom":"Neveu","sexe":"F"},"P0141":{"id":"P0141","prenom":"Jules","nom":"Neveu","sexe":"M"},"P0142":{"id":"P0142","prenom":"Félonise","nom":"Miron","sexe":"F"},"P0143":{"id":"P0143","prenom":"Francois-Xavier","nom":"Payette","sexe":"M"},"P0144":{"id":"P0144","prenom":"Zoé","nom":"Pépin-Lachance","sexe":"F"},"P0145":{"id":"P0145","prenom":"Jean-Marie","nom":"Pépin-Lachance","sexe":"M"},"P0146":{"id":"P0146","prenom":"Geneviève","nom":"Racine","sexe":"F"},"P0147":{"id":"P0147","prenom":"Jean-Baptiste","nom":"Payette","sexe":"M"},"P0148":{"id":"P0148","prenom":"Hélène","nom":"Pelletier","sexe":"F"},"P0149":{"id":"P0149","prenom":"Francois","nom":"Pelletier","sexe":"M"},"P0150":{"id":"P0150","prenom":"Marie-Hélène","nom":"Tellier","sexe":"F"},"P0151":{"id":"P0151","prenom":"Jean-Baptitse","nom":"Payette","sexe":"M"},"P0152":{"id":"P0152","prenom":"Judith","nom":"Beaupied","sexe":"F"},"P0153":{"id":"P0153","prenom":"Julien","nom":"Beaupied","sexe":"M"},"P0154":{"id":"P0154","prenom":"Ursule","nom":"Destroismaisons","sexe":"F"},"P0155":{"id":"P0155","prenom":"Jean-Baptiste","nom":"Payette","sexe":"M"},"P0156":{"id":"P0156","prenom":"Marie","nom":"Limbé","sexe":"F"},"P0157":{"id":"P0157","prenom":"Jean","nom":"Limbé","sexe":"M"},"P0158":{"id":"P0158","prenom":"Marie","nom":"Chevaudier","sexe":"F"},"P0159":{"id":"P0159","prenom":"Guillaume","nom":"Payette","sexe":"M"},"P0160":{"id":"P0160","prenom":"Marie-Margerite","nom":"Thouin","sexe":"F"},"P0161":{"id":"P0161","prenom":"Jean-Baptiste","nom":"Thouin","sexe":"M"},"P0162":{"id":"P0162","prenom":"Marie","nom":"Cadieu","sexe":"F"},"P0163":{"id":"P0163","prenom":"Guillaume","nom":"Payette","sexe":"M"},"P0164":{"id":"P0164","prenom":"Geneviève","nom":"Ménard","sexe":"F"},"P0165":{"id":"P0165","prenom":"Pierre","nom":"Ménard","sexe":"M"},"P0166":{"id":"P0166","prenom":"Margerite","nom":"Deshayes","sexe":"F"},"P0167":{"id":"P0167","prenom":"Pierre","nom":"Payette-St-Amour","sexe":"M"},"P0168":{"id":"P0168","prenom":"Louise","nom":"Tessier","sexe":"F"},"P0169":{"id":"P0169","prenom":"Urbain","nom":"Tessier","sexe":"M"},"P0170":{"id":"P0170","prenom":"Marie","nom":"Archambault","sexe":"F"},"P0171":{"id":"P0171","prenom":"Pierre","nom":"Payette-St-Amour","sexe":"M"},"P0172":{"id":"P0172","prenom":"Marie","nom":"Martin","sexe":"F"},"P0173":{"id":"P0173","prenom":"Alcide","nom":"Lafond","sexe":"M"},"P0174":{"id":"P0174","prenom":"Guy","nom":"Lafond","sexe":"M"},"P0175":{"id":"P0175","prenom":"Denise","nom":"Lafond","sexe":"F"},"P0176":{"id":"P0176","prenom":"Jacques","nom":"Lafond","sexe":"M"},"P0177":{"id":"P0177","prenom":"Jacqueline","nom":"Lafond","sexe":"F"},"P0178":{"id":"P0178","prenom":"Gilles","nom":"Lafond","sexe":"M"},"P0179":{"id":"P0179","prenom":"Michel","nom":"Lafond","sexe":"M"},"P0180":{"id":"P0180","prenom":"Yves","nom":"Lafond","sexe":"M"},"P0181":{"id":"P0181","prenom":"Lisette","nom":"Lafond","sexe":"F"},"P0182":{"id":"P0182","prenom":"Georgette","nom":"Lafond","sexe":"F"},"P0183":{"id":"P0183","prenom":"Jocelyne","nom":"Lafond","sexe":"F"},"P0184":{"id":"P0184","prenom":"Hervé","nom":"Lafond","sexe":"M"},"P0185":{"id":"P0185","prenom":"Lucienne","nom":"Lafond","sexe":"F"},"P0186":{"id":"P0186","prenom":"Rhéaume","nom":"Tellier","sexe":"M"},"P0187":{"id":"P0187","prenom":"André","nom":"Tellier","sexe":"M"},"P0188":{"id":"P0188","prenom":"Raymond","nom":"Tellier","sexe":"M"},"P0189":{"id":"P0189","prenom":"Lise","nom":"Tellier","sexe":"F"},"P0190":{"id":"P0190","prenom":"Johanne","nom":"Tellier","sexe":"F"},"P0191":{"id":"P0191","prenom":"René","nom":"Lafond","sexe":"M"},"P0192":{"id":"P0192","prenom":"Reina","nom":"Goyette","sexe":"F"},"P0193":{"id":"P0193","prenom":"Jean-Pierre","nom":"Lafond","sexe":"M"},"P0194":{"id":"P0194","prenom":"Anonyme","nom":"Lafond","sexe":"M"},"P0195":{"id":"P0195","prenom":"Serge","nom":"Lafond","sexe":"M"},"P0196":{"id":"P0196","prenom":"Normand","nom":"Lafond","sexe":"M"},"P0197":{"id":"P0197","prenom":"Robert","nom":"Lafond","sexe":"M"},"P0198":{"id":"P0198","prenom":"Christiane","nom":"Lafond","sexe":"F"},"P0199":{"id":"P0199","prenom":"Sylvie","nom":"Lafond","sexe":"F"},"P0200":{"id":"P0200","prenom":"Chantal","nom":"Lafond","sexe":"F"},"P0201":{"id":"P0201","prenom":"Martin","nom":"Lafond","sexe":"M"},"P0202":{"id":"P0202","prenom":"Martine","nom":"Lafond","sexe":"F"},"P0203":{"id":"P0203","prenom":"Yvonne","nom":"Lafond","sexe":"F"},"P0204":{"id":"P0204","prenom":"Francine","nom":"Girard","sexe":"F"},"P0205":{"id":"P0205","prenom":"Gabrielle","nom":"Lafond","sexe":"F"},"P0206":{"id":"P0206","prenom":"Michaël","nom":"O'Connor","sexe":"M"},"P0207":{"id":"P0207","prenom":"Brenda","nom":"O'Connor","sexe":"F"},"P0208":{"id":"P0208","prenom":"Albert","nom":"Lafond","sexe":"M"},"P0209":{"id":"P0209","prenom":"Emile","nom":"Lafond","sexe":"M"},"P0210":{"id":"P0210","prenom":"Jacques","nom":"Thouin","sexe":"M"},"P0211":{"id":"P0211","prenom":"Adrien","nom":"Lafond","sexe":"M"},"P0212":{"id":"P0212","prenom":"Reina","nom":"Lafond","sexe":"F"},"P0213":{"id":"P0213","prenom":"Yvon","nom":"Thouin","sexe":"M"},"P0214":{"id":"P0214","prenom":"Ginette","nom":"Thouin","sexe":"F"},"P0215":{"id":"P0215","prenom":"Jean-Marc","nom":"Thouin","sexe":"M"},"P0216":{"id":"P0216","prenom":"Germain","nom":"Thouin","sexe":"M"},"P0217":{"id":"P0217","prenom":"Diane","nom":"Thouin","sexe":"F"},"P0218":{"id":"P0218","prenom":"Gaétan","nom":"Thouin","sexe":"M"},"P0219":{"id":"P0219","prenom":"Réjeanne","nom":"Lafond","sexe":"F"},"P0220":{"id":"P0220","prenom":"Réjean","nom":"Lafond","sexe":"M"},"P0221":{"id":"P0221","prenom":"Normande","nom":"Lafond","sexe":"F"},"P0222":{"id":"P0222","prenom":"Alain","nom":"Lafond","sexe":"M"},"P0223":{"id":"P0223","prenom":"Claude","nom":"Gariépy","sexe":"M"},"P0224":{"id":"P0224","prenom":"Hugo","nom":"Gariépy","sexe":"M"},"P0225":{"id":"P0225","prenom":"Lucie","nom":"Lejeune","sexe":"F"},"P0226":{"id":"P0226","prenom":"Willie","nom":"Lafond","sexe":"M"},"P0227":{"id":"P0227","prenom":"Frédérik","nom":"Lafond","sexe":"M"},"P0228":{"id":"P0228","prenom":"Jean-Pierre","nom":"Ducharme","sexe":"M"},"P0229":{"id":"P0229","prenom":"Isa","nom":"Ducharme","sexe":"F"},"P0230":{"id":"P0230","prenom":"Gabriel","nom":"Lafond","sexe":"M"},"P0231":{"id":"P0231","prenom":"Dianne","nom":"Perrault","sexe":"F"},"P0232":{"id":"P0232","prenom":"Nathalie","nom":"Lafond","sexe":"F"},"P0233":{"id":"P0233","prenom":"Eric","nom":"Lafond","sexe":"M"},"P0234":{"id":"P0234","prenom":"Carole","nom":"Vachon","sexe":"F"},"P0235":{"id":"P0235","prenom":"Cécile","nom":"Perrault","sexe":"F"},"P0236":{"id":"P0236","prenom":"Nadine","nom":"Lafond","sexe":"F"},"P0237":{"id":"P0237","prenom":"Sylvain","nom":"Lafrenière","sexe":"M"},"P0238":{"id":"P0238","masque":true},"P0239":{"id":"P0239","masque":true},"P0240":{"id":"P0240","prenom":"Patrick","nom":"Deslauriers","sexe":"M"},"P0241":{"id":"P0241","prenom":"Sinaï","nom":"Thouin","sexe":"M"},"P0242":{"id":"P0242","prenom":"Christiane","nom":"Bruneau","sexe":"F"},"P0243":{"id":"P0243","prenom":"Francis","nom":"Thouin","sexe":"M"},"P0244":{"id":"P0244","prenom":"Claude","nom":"Roy","sexe":"M"},"P0245":{"id":"P0245","prenom":"Deborah Ann","nom":"Lipari","sexe":"F"},"P0246":{"id":"P0246","prenom":"Megan","nom":"Thouin","sexe":"F"},"P0247":{"id":"P0247","prenom":"Matthew","nom":"Thouin","sexe":"M"},"P0248":{"id":"P0248","prenom":"Patrick","nom":"Thouin","sexe":"M"},"P0249":{"id":"P0249","prenom":"Suzanne","nom":"Desrochers","sexe":"F"},"P0250":{"id":"P0250","prenom":"Marc","nom":"Thouin","sexe":"M"},"P0251":{"id":"P0251","prenom":"Marissa","nom":"Van Berkom","sexe":"F"},"P0252":{"id":"P0252","prenom":"Cassandra","nom":"Thouin","sexe":"F"},"P0253":{"id":"P0253","prenom":"Madeleine","nom":"Coderre","sexe":"F"},"P0254":{"id":"P0254","prenom":"Jocelyn","nom":"Thouin","sexe":"M"},"P0255":{"id":"P0255","prenom":"Catherine","nom":"Thouin","sexe":"F"},"P0256":{"id":"P0256","prenom":"Robert","nom":"Trépanier","sexe":"M"},"P0257":{"id":"P0257","prenom":"Julie","nom":"Trépanier","sexe":"F"},"P0258":{"id":"P0258","prenom":"Mathieu","nom":"Trépanier","sexe":"M"},"P0259":{"id":"P0259","prenom":"Arielle","sexe":"F"},"P0260":{"id":"P0260","prenom":"Hélène","nom":"Bujold","sexe":"F"},"P0261":{"id":"P0261","prenom":"Isabelle","nom":"Tellier","sexe":"F"},"P0262":{"id":"P0262","prenom":"Normand","nom":"Ducharme","sexe":"M"},"P0263":{"id":"P0263","prenom":"Julie","nom":"Ducharme","sexe":"F"},"P0264":{"id":"P0264","prenom":"Karine","nom":"Ducharme","sexe":"F"},"P0265":{"id":"P0265","prenom":"Madeleine","nom":"Daigneault","sexe":"F"},"P0266":{"id":"P0266","prenom":"David","nom":"Tellier","sexe":"M"},"P0267":{"id":"P0267","prenom":"Simon","nom":"Tellier","sexe":"M"},"P0268":{"id":"P0268","prenom":"Denis","nom":"Lafond","sexe":"M"},"P0269":{"id":"P0269","prenom":"Eleonore","nom":"Lajeunesse","sexe":"F"},"P0270":{"id":"P0270","prenom":"Fleurette","nom":"Laporte","sexe":"F"},"P0271":{"id":"P0271","prenom":"Laurentia","nom":"Desroches","sexe":"F"},"P0272":{"id":"P0272","prenom":"Alexandre","nom":"Laporte","sexe":"M"},"P0273":{"id":"P0273","prenom":"Florent","nom":"Ducharme","sexe":"M"},"P0274":{"id":"P0274","prenom":"Yvette","nom":"Ducharme","sexe":"F"},"P0275":{"id":"P0275","prenom":"André","nom":"Neveu","sexe":"M"},"P0276":{"id":"P0276","prenom":"Guy","nom":"Ducharme","sexe":"M"},"P0277":{"id":"P0277","prenom":"Lise","nom":"Ducharme","sexe":"F"},"P0278":{"id":"P0278","prenom":"Michel","nom":"Pelletier","sexe":"M"},"P0279":{"id":"P0279","prenom":"Céline","nom":"Ducharme","sexe":"F"},"P0280":{"id":"P0280","prenom":"Christian","nom":"Rondeau","sexe":"M"},"P0281":{"id":"P0281","prenom":"Ghislaine","nom":"Ducharme","sexe":"F"},"P0282":{"id":"P0282","prenom":"Bruneau","nom":"Lebrosseur","sexe":"M"},"P0283":{"id":"P0283","prenom":"Elyse","nom":"Neveu","sexe":"F"},"P0284":{"id":"P0284","prenom":"Eric","nom":"Baunier","sexe":"M"},"P0285":{"id":"P0285","prenom":"Marylène","nom":"Neveu","sexe":"F"},"P0286":{"id":"P0286","prenom":"Cindy","nom":"Ducharme","sexe":"F"},"P0287":{"id":"P0287","prenom":"Kaven","nom":"Pelletier","sexe":"M"},"P0288":{"id":"P0288","prenom":"Kelly","nom":"Rondeau","sexe":"F"},"P0289":{"id":"P0289","prenom":"Jimmy","nom":"Rondeau","sexe":"M"},"P0290":{"id":"P0290","prenom":"Minique","nom":"Ducharme","sexe":"F"},"P0291":{"id":"P0291","prenom":"Alain","nom":"Cormier","sexe":"M"},"P0292":{"id":"P0292","prenom":"Karen","nom":"Cormier","sexe":"F"},"P0293":{"id":"P0293","prenom":"Marie-Soleil","nom":"Cormier","sexe":"F"},"P0294":{"id":"P0294","prenom":"Jessie","nom":"Lebrosseur","sexe":"F"},"P0295":{"id":"P0295","prenom":"Kim","nom":"Lebrosseur","sexe":"F"},"P0296":{"id":"P0296","prenom":"Lelly","nom":"Goyet","sexe":"F"},"P0297":{"id":"P0297","prenom":"Lilianne","nom":"Lefebvre","sexe":"F"},"P0298":{"id":"P0298","prenom":"Ernest","nom":"O'Connor","sexe":"M"},"P0299":{"id":"P0299","prenom":"Henri","nom":"Girard","sexe":"M"},"P0300":{"id":"P0300","prenom":"Roger","nom":"Asselin","sexe":"M"},"P0301":{"id":"P0301","prenom":"Eric","nom":"Asselin","sexe":"M"},"P0302":{"id":"P0302","prenom":"Nadine","nom":"Asselin","sexe":"F"},"P0303":{"id":"P0303","prenom":"Laurence","nom":"Laperriere","sexe":"F"},"P0304":{"id":"P0304","prenom":"Eric","nom":"Laperriere","sexe":"M"},"P0305":{"id":"P0305","masque":true},"P0306":{"id":"P0306","masque":true},"P0307":{"id":"P0307","prenom":"Michel","nom":"Lafond","sexe":"M"},"P0308":{"id":"P0308","prenom":"Lise","nom":"Larsen","sexe":"F"},"P0309":{"id":"P0309","prenom":"Dominique","nom":"Lafond","sexe":"F"},"P0310":{"id":"P0310","prenom":"Claude","nom":"Ricard","sexe":"M"},"P0311":{"id":"P0311","prenom":"Danielle","nom":"Ricard","sexe":"F"},"P0312":{"id":"P0312","prenom":"Maurice","nom":"Soulière","sexe":"M"},"P0313":{"id":"P0313","prenom":"Mario","nom":"Ricard","sexe":"M"},"P0314":{"id":"P0314","prenom":"Joahne","nom":"Ricard","sexe":"F"},"P0315":{"id":"P0315","prenom":"Jean-Pierre","nom":"Lafortune","sexe":"M"},"P0316":{"id":"P0316","prenom":"Marion","nom":"Ricard","sexe":"F"},"P0317":{"id":"P0317","prenom":"Denis","nom":"Lajeunesse","sexe":"M"},"P0318":{"id":"P0318","prenom":"Béatrice","nom":"Carroll","sexe":"F"},"P0319":{"id":"P0319","prenom":"Luc","nom":"Lafond","sexe":"M"},"P0320":{"id":"P0320","prenom":"Félix","nom":"Lafond","sexe":"M"},"P0321":{"id":"P0321","prenom":"Diane","nom":"Lafond","sexe":"F"},"P0322":{"id":"P0322","prenom":"Denis","nom":"St-Jacques","sexe":"M"},"P0323":{"id":"P0323","prenom":"Valérie","nom":"St-Jacques","sexe":"F"},"P0324":{"id":"P0324","prenom":"France","nom":"Lafond","sexe":"F"},"P0325":{"id":"P0325","prenom":"Richard","nom":"Lafond","sexe":"M"},"P0326":{"id":"P0326","prenom":"Christine","nom":"Fromant","sexe":"F"},"P0327":{"id":"P0327","prenom":"Sylvie","nom":"Lafond","sexe":"F"},"P0328":{"id":"P0328","prenom":"Suzie","nom":"Lafond","sexe":"F"},"P0329":{"id":"P0329","prenom":"Richard","nom":"Perreault","sexe":"M"},"P0330":{"id":"P0330","prenom":"Kevin","nom":"Perreault","sexe":"M"},"P0331":{"id":"P0331","prenom":"Mickaël","nom":"Perreault","sexe":"M"},"P0332":{"id":"P0332","prenom":"Eliot","nom":"Perreault","sexe":"M"},"P0333":{"id":"P0333","prenom":"Rémi","nom":"Coderre","sexe":"M"},"P0334":{"id":"P0334","prenom":"Sophie","nom":"Coderre","sexe":"F"},"P0335":{"id":"P0335","prenom":"Alexandre","nom":"Ricard","sexe":"M"},"P0336":{"id":"P0336","prenom":"Samuel","nom":"Ricard","sexe":"M"},"P0337":{"id":"P0337","prenom":"Laurie Eve","nom":"Ricard","sexe":"F"},"P0338":{"id":"P0338","prenom":"Stéphane","nom":"Coderre","sexe":"M"},"P0339":{"id":"P0339","prenom":"Amélie","nom":"Harnois","sexe":"F"},"P0340":{"id":"P0340","prenom":"Julie","nom":"Coderre","sexe":"F"},"P0341":{"id":"P0341","prenom":"Pascal","nom":"Bouchard","sexe":"M"},"P0342":{"id":"P0342","prenom":"Eliane","nom":"Bouchard","sexe":"F"},"P0343":{"id":"P0343","prenom":"Simon-Olivier","nom":"Bouchard","sexe":"M"},"P0344":{"id":"P0344","prenom":"Martine","nom":"Paré","sexe":"F"},"P0345":{"id":"P0345","prenom":"Jeannine","nom":"Breton","sexe":"F"},"P0346":{"id":"P0346","prenom":"Jean-Paul","nom":"Normandin","sexe":"M"},"P0347":{"id":"P0347","prenom":"Murielle","nom":"Carrier","sexe":"F"},"P0348":{"id":"P0348","prenom":"Francine","nom":"Legault","sexe":"F"},"P0349":{"id":"P0349","prenom":"Robert","nom":"Lafond","sexe":"M"},"P0350":{"id":"P0350","prenom":"Louise","nom":"Bussières","sexe":"F"},"P0351":{"id":"P0351","prenom":"Johane","nom":"Deschamps","sexe":"F"},"P0352":{"id":"P0352","prenom":"Claudine","nom":"Morin","sexe":"F"},"P0353":{"id":"P0353","prenom":"Eric","nom":"Lafond","sexe":"M"},"P0354":{"id":"P0354","prenom":"Pascal","nom":"Lafond","sexe":"M"},"P0355":{"id":"P0355","prenom":"Alexandre","nom":"Lafond","sexe":"M"},"P0356":{"id":"P0356","prenom":"Antoinette","nom":"Métivier","sexe":"F"},"P0357":{"id":"P0357","prenom":"Sylvie","nom":"Bélair","sexe":"F"},"P0358":{"id":"P0358","prenom":"Francine","nom":"Legault","sexe":"F"},"P0359":{"id":"P0359","prenom":"Sébastien","nom":"Lafond","sexe":"M"},"P0360":{"id":"P0360","prenom":"Isabelle","nom":"Lafond","sexe":"F"},"P0361":{"id":"P0361","prenom":"Georges","nom":"Lafond","sexe":"M"},"P0362":{"id":"P0362","prenom":"Jeanne","nom":"Lanoue","sexe":"F"},"P0363":{"id":"P0363","prenom":"Thérèse","nom":"Lafond","sexe":"F"},"P0364":{"id":"P0364","prenom":"Colette","nom":"Lafond","sexe":"F"},"P0365":{"id":"P0365","prenom":"Roger","nom":"Lafond","sexe":"M"},"P0366":{"id":"P0366","prenom":"Léo","nom":"Lafond","sexe":"M"},"P0367":{"id":"P0367","prenom":"Wilfrid","nom":"Lafond","sexe":"M"},"P0368":{"id":"P0368","prenom":"Alfred","nom":"Lafond","sexe":"M"},"P0369":{"id":"P0369","prenom":"Come","nom":"Lafond","sexe":"M"},"P0370":{"id":"P0370","prenom":"Claude","nom":"Lafond","sexe":"M"},"P0371":{"id":"P0371","prenom":"Andréa","nom":"Lafond","sexe":"F"},"P0372":{"id":"P0372","prenom":"Claudette","nom":"Lafond","sexe":"F"},"P0373":{"id":"P0373","prenom":"Denise","nom":"Lafond","sexe":"F"},"P0374":{"id":"P0374","prenom":"Jeanne d'Arc","nom":"Lafond","sexe":"F"},"P0375":{"id":"P0375","prenom":"Madeleine","nom":"Lafond","sexe":"F"},"P0376":{"id":"P0376","prenom":"Solange","nom":"Lafond","sexe":"F"},"P0377":{"id":"P0377","masque":true},"P0378":{"id":"P0378","masque":true},"P0379":{"id":"P0379","prenom":"Martine","nom":"Lafond","sexe":"F"},"P0380":{"id":"P0380","prenom":"Charlotte","nom":"Morris Lafond","sexe":"F"},"P0381":{"id":"P0381","prenom":"Michelle","nom":"Morris","sexe":"F"}},"familles":{"F0001":{"id":"F0001","parents":["P0002","P0003"],"enfants":["P0001","P0377","P0378"]},"F0002":{"id":"F0002","parents":["P0004","P0005"],"enfants":["P0002"]},"F0003":{"id":"F0003","parents":["P0006","P0005"],"enfants":["P0007"]},"F0005":{"id":"F0005","parents":["P0009","P0010"],"enfants":["P0018","P0020","P0021","P0022","P0024","P0026","P0028","P0029","P0031","P0004"]},"F0006":{"id":"F0006","parents":["P0011","P0012"],"enfants":["P0005"]},"F0007":{"id":"F0007","parents":["P0013","P0014"],"enfants":["P0003","P0017"]},"F0008":{"id":"F0008","parents":["P0015","P0016"],"enfants":["P0013"]},"F0009":{"id":"F0009","parents":["P0019","P0018"],"enfants":["P0047"]},"F0010":{"id":"F0010","parents":["P0023","P0022"],"enfants":["P0074","P0081","P0092","P0076","P0088","P0085"]},"F0011":{"id":"F0011","parents":["P0024","P0025"],"enfants":["P0050","P0057","P0065","P0053","P0063"]},"F0012":{"id":"F0012","parents":["P0027","P0026"],"enfants":["P0069","P0071"]},"F0013":{"id":"F0013","parents":["P0030","P0029"],"enfants":["P0043","P0044"]},"F0014":{"id":"F0014","parents":["P0033","P0032"],"enfants":["P0010"]},"F0015":{"id":"F0015","parents":["P0034","P0035"],"enfants":["P0033"]},"F0016":{"id":"F0016","parents":["P0036","P0037"],"enfants":["P0032"]},"F0017":{"id":"F0017","parents":["P0038","P0039"],"enfants":["P0036"]},"F0018":{"id":"F0018","parents":["P0036","P0040"],"enfants":[]},"F0019":{"id":"F0019","parents":["P0036","P0041"],"enfants":[]},"F0020":{"id":"F0020","parents":["P0036","P0042"],"enfants":[]},"F0021":{"id":"F0021","parents":["P0043"],"enfants":["P0045","P0046"]},"F0022":{"id":"F0022","parents":["P0047"],"enfants":["P0048","P0049"]},"F0023":{"id":"F0023","parents":["P0051","P0050"],"enfants":["P0052"]},"F0024":{"id":"F0024","parents":["P0054","P0053"],"enfants":["P0055","P0056"]},"F0025":{"id":"F0025","parents":["P0058","P0057"],"enfants":["P0059","P0060"]},"F0026":{"id":"F0026","parents":["P0061","P0057"],"enfants":["P0062"]},"F0027":{"id":"F0027","parents":["P0063"],"enfants":["P0064"]},"F0028":{"id":"F0028","parents":["P0065","P0066"],"enfants":["P0067","P0068"]},"F0029":{"id":"F0029","parents":["P0069"],"enfants":["P0070"]},"F0030":{"id":"F0030","parents":["P0071","P0072"],"enfants":["P0073"]},"F0031":{"id":"F0031","parents":["P0075","P0074"],"enfants":[]},"F0032":{"id":"F0032","parents":["P0077","P0076"],"enfants":["P0078","P0079","P0080"]},"F0033":{"id":"F0033","parents":["P0082","P0081"],"enfants":["P0083","P0084"]},"F0034":{"id":"F0034","parents":["P0085","P0086"],"enfants":["P0087"]},"F0035":{"id":"F0035","parents":["P0089","P0088"],"enfants":[]},"F0036":{"id":"F0036","parents":["P0090","P0088"],"enfants":["P0091"]},"F0037":{"id":"F0037","parents":["P0092","P0093"],"enfants":["P0094","P0095"]},"F0038":{"id":"F0038","parents":["P0096","P0097"],"enfants":["P0208","P0173","P0230","P0009","P0209","P0211","P0203","P0205","P0098","P0191","P0185","P0212","P0184"]},"F0039":{"id":"F0039","parents":["P0098","P0099"],"enfants":["P0219","P0220","P0221","P0222"]},"F0040":{"id":"F0040","parents":["P0100","P0101"],"enfants":["P0096","P0361","P0368","P0366","P0367"]},"F0041":{"id":"F0041","parents":["P0102","P0103"],"enfants":["P0101"]},"F0042":{"id":"F0042","parents":["P0100","P0104"],"enfants":["P0125"]},"F0043":{"id":"F0043","parents":["P0105","P0106"],"enfants":["P0104"]},"F0044":{"id":"F0044","parents":["P0107","P0108"],"enfants":["P0100"]},"F0045":{"id":"F0045","parents":["P0109","P0110"],"enfants":["P0108"]},"F0046":{"id":"F0046","parents":["P0111","P0112"],"enfants":["P0107"]},"F0047":{"id":"F0047","parents":["P0113","P0114"],"enfants":["P0112"]},"F0048":{"id":"F0048","parents":["P0115","P0116"],"enfants":["P0111"]},"F0049":{"id":"F0049","parents":["P0117","P0118"],"enfants":["P0116"]},"F0050":{"id":"F0050","parents":["P0119","P0120"],"enfants":["P0115"]},"F0051":{"id":"F0051","parents":["P0121","P0122"],"enfants":["P0120"]},"F0052":{"id":"F0052","parents":["P0123","P0124"],"enfants":["P0119"]},"F0053":{"id":"F0053","parents":["P0125","P0126"],"enfants":[]},"F0054":{"id":"F0054","parents":["P0127","P0128"],"enfants":["P0015"]},"F0055":{"id":"F0055","parents":["P0129","P0130"],"enfants":["P0127"]},"F0056":{"id":"F0056","parents":["P0131","P0132"],"enfants":["P0129"]},"F0057":{"id":"F0057","parents":["P0133","P0134"],"enfants":["P0131"]},"F0058":{"id":"F0058","parents":["P0135","P0136"],"enfants":["P0133"]},"F0059":{"id":"F0059","parents":["P0137","P0138"],"enfants":["P0099"]},"F0060":{"id":"F0060","parents":["P0139","P0140"],"enfants":["P0097"]},"F0061":{"id":"F0061","parents":["P0141","P0142"],"enfants":["P0140"]},"F0062":{"id":"F0062","parents":["P0143","P0144"],"enfants":["P0139"]},"F0063":{"id":"F0063","parents":["P0145","P0146"],"enfants":["P0144"]},"F0064":{"id":"F0064","parents":["P0147","P0148"],"enfants":["P0143"]},"F0065":{"id":"F0065","parents":["P0149","P0150"],"enfants":["P0148"]},"F0066":{"id":"F0066","parents":["P0151","P0152"],"enfants":["P0147"]},"F0067":{"id":"F0067","parents":["P0153","P0154"],"enfants":["P0152"]},"F0068":{"id":"F0068","parents":["P0155","P0156"],"enfants":["P0151"]},"F0069":{"id":"F0069","parents":["P0157","P0158"],"enfants":["P0156"]},"F0070":{"id":"F0070","parents":["P0159","P0160"],"enfants":["P0155"]},"F0071":{"id":"F0071","parents":["P0161","P0162"],"enfants":["P0160"]},"F0072":{"id":"F0072","parents":["P0163","P0164"],"enfants":["P0159"]},"F0073":{"id":"F0073","parents":["P0165","P0166"],"enfants":["P0164"]},"F0074":{"id":"F0074","parents":["P0167","P0168"],"enfants":["P0163"]},"F0075":{"id":"F0075","parents":["P0169","P0170"],"enfants":["P0168"]},"F0076":{"id":"F0076","parents":["P0171","P0172"],"enfants":["P0167"]},"F0077":{"id":"F0077","parents":["P0173","P0269"],"enfants":["P0182","P0177","P0176","P0178","P0175","P0174","P0179","P0268","P0181","P0307","P0180","P0183"]},"F0078":{"id":"F0078","parents":["P0186","P0185"],"enfants":["P0188","P0189","P0190","P0187"]},"F0079":{"id":"F0079","parents":["P0191","P0192"],"enfants":["P0193","P0194","P0195","P0196","P0197","P0198","P0199","P0200","P0201","P0202"]},"F0080":{"id":"F0080","parents":["P0299","P0203"],"enfants":["P0204"]},"F0081":{"id":"F0081","parents":["P0298","P0205"],"enfants":["P0207","P0206"]},"F0082":{"id":"F0082","parents":["P0356"],"enfants":["P0210"]},"F0083":{"id":"F0083","parents":["P0241","P0212"],"enfants":["P0215","P0216","P0217","P0214","P0213","P0218"]},"F0084":{"id":"F0084","parents":["P0223","P0219"],"enfants":["P0224"]},"F0085":{"id":"F0085","parents":["P0220","P0225"],"enfants":["P0226","P0227"]},"F0086":{"id":"F0086","parents":["P0228","P0221"],"enfants":["P0229"]},"F0087":{"id":"F0087","parents":["P0193","P0231"],"enfants":["P0232","P0233"]},"F0088":{"id":"F0088","parents":["P0196","P0234"],"enfants":[]},"F0089":{"id":"F0089","parents":["P0197","P0235"],"enfants":["P0236"]},"F0090":{"id":"F0090","parents":["P0237","P0236"],"enfants":["P0239","P0238"]},"F0091":{"id":"F0091","parents":["P0240","P0202"],"enfants":[]},"F0092":{"id":"F0092","parents":["P0213","P0242"],"enfants":["P0243"]},"F0093":{"id":"F0093","parents":["P0244","P0214"],"enfants":[]},"F0094":{"id":"F0094","parents":["P0218","P0245"],"enfants":["P0246","P0247","P0248"]},"F0095":{"id":"F0095","parents":["P0215","P0249"],"enfants":["P0250"]},"F0096":{"id":"F0096","parents":["P0250","P0251"],"enfants":["P0252"]},"F0097":{"id":"F0097","parents":["P0216","P0253"],"enfants":["P0255","P0254"]},"F0098":{"id":"F0098","parents":["P0256","P0217"],"enfants":["P0257","P0258"]},"F0099":{"id":"F0099","parents":["P0257"],"enfants":["P0259"]},"F0100":{"id":"F0100","parents":["P0187","P0260"],"enfants":["P0261"]},"F0101":{"id":"F0101","parents":["P0262","P0189"],"enfants":["P0264","P0263"]},"F0102":{"id":"F0102","parents":["P0188","P0265"],"enfants":["P0267","P0266"]},"F0103":{"id":"F0103","parents":["P0270"],"enfants":["P0014","P0344"]},"F0104":{"id":"F0104","parents":["P0272","P0271"],"enfants":["P0270"]},"F0105":{"id":"F0105","parents":["P0273","P0177"],"enfants":["P0274","P0276","P0277","P0279","P0290","P0281"]},"F0106":{"id":"F0106","parents":["P0275","P0274"],"enfants":["P0283","P0285"]},"F0107":{"id":"F0107","parents":["P0278","P0277"],"enfants":["P0287"]},"F0108":{"id":"F0108","parents":["P0280","P0279"],"enfants":["P0288","P0289"]},"F0109":{"id":"F0109","parents":["P0282","P0281"],"enfants":["P0294","P0295"]},"F0110":{"id":"F0110","parents":["P0284","P0283"],"enfants":[]},"F0111":{"id":"F0111","parents":["P0276","P0357"],"enfants":["P0286"]},"F0112":{"id":"F0112","parents":["P0291","P0290"],"enfants":["P0292","P0293"]},"F0113":{"id":"F0113","parents":["P0184","P0296"],"enfants":[]},"F0114":{"id":"F0114","parents":["P0184","P0297"],"enfants":[]},"F0115":{"id":"F0115","parents":["P0300","P0204"],"enfants":["P0302","P0301"]},"F0116":{"id":"F0116","parents":["P0304","P0302"],"enfants":["P0303","P0306","P0305"]},"F0117":{"id":"F0117","parents":["P0307","P0308"],"enfants":["P0309"]},"F0118":{"id":"F0118","parents":["P0310","P0181"],"enfants":["P0311","P0313","P0316","P0314"]},"F0119":{"id":"F0119","parents":["P0312","P0311"],"enfants":[]},"F0120":{"id":"F0120","parents":["P0315","P0314"],"enfants":[]},"F0121":{"id":"F0121","parents":["P0317","P0316"],"enfants":[]},"F0122":{"id":"F0122","parents":["P0174","P0318"],"enfants":["P0319","P0321","P0324","P0325","P0328","P0327","P0379"]},"F0123":{"id":"F0123","parents":["P0319","P0344"],"enfants":["P0320"]},"F0124":{"id":"F0124","parents":["P0322","P0321"],"enfants":["P0323"]},"F0125":{"id":"F0125","parents":["P0325","P0326"],"enfants":[]},"F0126":{"id":"F0126","parents":["P0329","P0328"],"enfants":["P0330","P0331","P0332"]},"F0127":{"id":"F0127","parents":["P0333","P0183"],"enfants":["P0334","P0340","P0338"]},"F0128":{"id":"F0128","parents":["P0335","P0334"],"enfants":["P0336","P0337"]},"F0129":{"id":"F0129","parents":["P0338","P0339"],"enfants":[]},"F0130":{"id":"F0130","parents":["P0341","P0340"],"enfants":["P0342","P0343"]},"F0133":{"id":"F0133","parents":["P0176","P0345"],"enfants":[]},"F0134":{"id":"F0134","parents":["P0346","P0181"],"enfants":[]},"F0135":{"id":"F0135","parents":["P0178","P0347"],"enfants":["P0349"]},"F0136":{"id":"F0136","parents":["P0178","P0358"],"enfants":[]},"F0139":{"id":"F0139","parents":["P0349","P0350"],"enfants":[]},"F0140":{"id":"F0140","parents":["P0349","P0351"],"enfants":["P0359","P0360"]},"F0141":{"id":"F0141","parents":["P0180","P0352"],"enfants":["P0353","P0354","P0355"]},"F0142":{"id":"F0142","parents":["P0209","P0356"],"enfants":[]},"F0143":{"id":"F0143","parents":["P0361","P0362"],"enfants":["P0376","P0363","P0370","P0374","P0365","P0373","P0371","P0372","P0364","P0369","P0375"]},"F0145":{"id":"F0145","parents":["P0381","P0379"],"enfants":["P0380"]}},"medias":{}};
+const MODE = "public";
+
+(function(){
+"use strict";
+const P = ARBRE.personnes, F = ARBRE.familles, M = ARBRE.medias || {};
+const PRIVE = MODE === "prive";
+const DEPART = ARBRE.meta.personne_depart;
+
+/* ---------- index ---------- */
+const parentsDe = {}, origine = {}, unions = {};
+for (const k in P){ parentsDe[k] = []; unions[k] = []; }
+for (const fid in F){
+  const f = F[fid];
+  (f.parents||[]).forEach(p => unions[p] && unions[p].push(fid));
+  (f.enfants||[]).forEach(e => { if (P[e]) { parentsDe[e] = (f.parents||[]).filter(x => P[x]); origine[e] = fid; } });
+}
+const enfantsDe = k => unions[k].flatMap(fid => F[fid].enfants||[]);
+const conjointsDe = k => unions[k].flatMap(fid => (F[fid].parents||[]).filter(x => x !== k));
+const fratrieDe = k => origine[k] ? F[origine[k]].enfants.filter(x => x !== k) : [];
+const masque = k => !!(P[k] && P[k].masque);
+
+/* ---------- utilitaires ---------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const nom = k => masque(k) ? "Personne mineure" : [P[k].prenom, P[k].nom].filter(Boolean).join(" ") || "Sans nom";
+const fem = k => P[k] && P[k].sexe === "F";
+const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+function fDate(d){
+  if (!d) return "";
+  const m = /^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/.exec(d);
+  if (!m) return d;
+  if (m[3]) return `${+m[3] === 1 ? "1er" : +m[3]} ${MOIS[+m[2]-1]} ${m[1]}`;
+  if (m[2]) return `${MOIS[+m[2]-1]} ${m[1]}`;
+  return m[1];
+}
+const an = d => (d && /^\d{4}/.test(d)) ? d.slice(0,4) : null;
+function annees(k){
+  if (!PRIVE || masque(k)) return "";
+  const p = P[k];
+  const n = an((p.naissance||{}).date) || an((p.bapteme||{}).date);
+  const d = an((p.deces||{}).date);
+  const dn = n || (p._annee ? "~" + p._annee : "");
+  if (d) return `${dn || "?"} – ${d}`;
+  if (p.deces) return `${dn || "?"} – ?`;
+  return dn ? (p._vivant === false ? `${dn} – ?` : dn) : "";
+}
+
+/* ---------- parenté ---------- */
+function ancetres(k){
+  const dist = {[k]:0}, prec = {[k]:null}, file = [k];
+  while (file.length){
+    const x = file.shift();
+    for (const p of parentsDe[x]) if (!(p in dist)) { dist[p] = dist[x]+1; prec[p] = x; file.push(p); }
+  }
+  return {dist, prec};
+}
+const ord = n => n === 1 ? "1er" : n + "e";
+function nomLien(a, b, f, demi){
+  const g = (m, fe) => f ? fe : m;
+  if (a === 0 && b === 0) return "la même personne";
+  if (b === 0) return ({1:g("père","mère"),2:g("grand-père","grand-mère"),3:g("arrière-grand-père","arrière-grand-mère"),4:g("arrière-arrière-grand-père","arrière-arrière-grand-mère")})[a] || `ancêtre à la ${ord(a)} génération`;
+  if (a === 0) return ({1:g("fils","fille"),2:g("petit-fils","petite-fille"),3:g("arrière-petit-fils","arrière-petite-fille")})[b] || `descendant${f?"e":""} à la ${ord(b)} génération`;
+  if (a === 1 && b === 1) return (demi ? "demi-" : "") + g("frère","sœur");
+  if (a === 1) return ({2:g("neveu","nièce"),3:g("petit-neveu","petite-nièce")})[b] || "arrière-".repeat(b-3) + g("petit-neveu","petite-nièce");
+  if (b === 1) return ({2:g("oncle","tante"),3:g("grand-oncle","grand-tante")})[a] || "arrière-".repeat(a-3) + g("grand-oncle","grand-tante");
+  const deg = Math.min(a,b) - 1, cousin = g("cousin","cousine");
+  const base = deg === 1 ? `${cousin} ${g("germain","germaine")}` : deg === 2 ? `${cousin} ${g("issu","issue")} de germain` : `${cousin} au ${ord(deg)} degré`;
+  const ecart = b - a;
+  if (!ecart) return base;
+  const neutre = ({1:"cousin(e) germain(e)",2:"cousin(e) issu(e) de germain"})[deg] || `cousin(e) au ${ord(deg)} degré`;
+  if (ecart > 0) return `${({1:g("fils","fille"),2:g("petit-fils","petite-fille")})[ecart] || g("descendant","descendante")} d'un(e) ${neutre}`;
+  return `${base} ${({1:"d'un parent",2:"d'un grand-parent"})[-ecart] || "d'un ancêtre"}`;
+}
+function article(n, f){
+  if (n.startsWith("la même")) return n;
+  if (/^[aeiouéèêàâîôûAEIOU]/.test(n)) return "l'" + n;
+  return (f ? "la " : "le ") + n;
+}
+function lienSang(A, B){
+  const da = ancetres(A), db = ancetres(B);
+  let best = Infinity, ancs = [];
+  for (const x in da.dist) if (x in db.dist){
+    const s = da.dist[x] + db.dist[x];
+    if (s < best){ best = s; ancs = [x]; } else if (s === best) ancs.push(x);
+  }
+  if (!ancs.length) return null;
+  const a = da.dist[ancs[0]], b = db.dist[ancs[0]];
+  ancs = ancs.filter(x => da.dist[x] === a && db.dist[x] === b);
+  const chemin = (prec, x) => { const c = []; while (x){ c.push(x); x = prec[x]; } return c; }; // ancêtre → personne
+  return {texte: nomLien(a, b, fem(B), a===1 && b===1 && ancs.length===1), ancs, a, b,
+          cheminA: chemin(da.prec, ancs[0]), cheminB: chemin(db.prec, ancs[0])};
+}
+function lien(A, B){
+  const r = lienSang(A, B);
+  if (r) return {phrase: `${nom(B)} est ${article(r.texte, fem(B))} de ${nom(A)}.`, sang: r};
+  for (const c of conjointsDe(B)){
+    if (c === A) return {phrase: `${nom(B)} est ${fem(B) ? "la conjointe" : "le conjoint"} de ${nom(A)}.`};
+    const s = lienSang(A, c);
+    if (s) return {phrase: `${nom(B)} est conjoint(e) de ${nom(c)}, qui est ${article(s.texte, fem(c))} de ${nom(A)}.`, sang: s, par: c};
+  }
+  for (const c of conjointsDe(A)){
+    const s = lienSang(c, B);
+    if (s) return {phrase: `${nom(B)} est ${article(s.texte, fem(B))} de ${nom(c)}, conjoint(e) de ${nom(A)}.`, sang: s};
+  }
+  return {phrase: `Aucun lien trouvé entre ${nom(A)} et ${nom(B)} dans l'arbre.`};
+}
+
+/* ---------- état / routage ---------- */
+let vue = "famille", focus = DEPART, lienA = DEPART, lienB = null, nbGen = 5;
+function lireHash(){
+  const [, v, id, id2] = location.hash.split("/");
+  if (["famille","ascendance","lien","index"].includes(v)) vue = v;
+  if (id && P[id] && !masque(id)) { if (vue === "lien") lienA = id; else focus = id; }
+  if (vue === "lien" && id2 && P[id2] && !masque(id2)) lienB = id2;
+}
+function aller(v, id, id2){
+  const h = "#/" + v + (id ? "/" + id : "") + (id2 ? "/" + id2 : "");
+  if (location.hash !== h) location.hash = h; else rendre();
+}
+window.addEventListener("hashchange", () => { lireHash(); rendre(); window.scrollTo({top:0}); });
+
+/* ---------- composants ---------- */
+function carte(k, cls=""){
+  if (!k) return `<div class="carte vide ${cls}">Inconnu</div>`;
+  if (masque(k)) return `<div class="carte masque ${cls}" title="Nom masqué : personne mineure">Personne mineure</div>`;
+  const p = P[k], d = annees(k);
+  return `<button class="carte ${p.sexe||""} ${cls}" data-id="${k}" title="${esc(nom(k))}">
+    <span class="prenom">${esc(p.prenom||"")}</span><span class="nom">${esc(p.nom||"")}</span>${d ? `<span class="dates">${esc(d)}</span>` : ""}</button>`;
+}
+function champRecherche(id, placeholder, surChoix, valeur){
+  const el = document.getElementById(id);
+  el.innerHTML = `<input type="search" placeholder="${esc(placeholder)}" aria-label="${esc(placeholder)}" autocomplete="off" value="${esc(valeur||"")}"><div class="resultats" role="listbox"></div>`;
+  const inp = el.querySelector("input"), res = el.querySelector(".resultats");
+  let liste = [], actif = 0;
+  const tous = Object.keys(P).filter(k => !masque(k)).map(k => [k, norm(nom(k))]);
+  function maj(){
+    const q = norm(inp.value).trim().split(/\s+/).filter(Boolean);
+    if (!q.length){ res.classList.remove("ouvert"); return; }
+    liste = tous.filter(([,n]) => q.every(t => n.includes(t))).slice(0, 12).map(([k]) => k);
+    actif = 0;
+    res.innerHTML = liste.length ? liste.map((k,i) => `<button data-id="${k}" class="${i===0?"actif":""}">${esc(nom(k))}<span class="an">${esc(annees(k))}</span></button>`).join("")
+                                 : `<div class="note" style="padding:8px 12px">Aucun résultat</div>`;
+    res.classList.add("ouvert");
+  }
+  inp.addEventListener("input", maj);
+  inp.addEventListener("focus", () => { if (inp.value && valeur !== inp.value) maj(); });
+  inp.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp"){
+      e.preventDefault(); actif = (actif + (e.key === "ArrowDown" ? 1 : -1) + liste.length) % Math.max(liste.length,1);
+      res.querySelectorAll("button").forEach((b,i) => b.classList.toggle("actif", i === actif));
+    } else if (e.key === "Enter" && liste[actif]){ choisir(liste[actif]); }
+    else if (e.key === "Escape"){ res.classList.remove("ouvert"); }
+  });
+  res.addEventListener("mousedown", e => { const b = e.target.closest("button[data-id]"); if (b){ e.preventDefault(); choisir(b.dataset.id); } });
+  inp.addEventListener("blur", () => setTimeout(() => res.classList.remove("ouvert"), 150));
+  function choisir(k){ res.classList.remove("ouvert"); inp.blur(); surChoix(k, inp); }
+}
+
+/* ---------- vue Famille ---------- */
+function vueFamille(){
+  const k = focus, par = parentsDe[k];
+  const pere = par.find(x => P[x].sexe === "M") || null, mere = par.find(x => P[x].sexe === "F") || null;
+  const ordonnes = (pere || mere) ? [pere, mere] : [];
+  let h = `<div class="grille"><div>`;
+  // grands-parents
+  const gp = ordonnes.map(x => x ? parentsDe[x] : []);
+  if (gp.some(g => g.length)){
+    h += `<div class="rangee"><h3>Grands-parents</h3><div class="groupes">` + ordonnes.map((x,i) => {
+      const g = gp[i]; const gpe = g.find(y => P[y].sexe==="M"), gme = g.find(y => P[y].sexe==="F");
+      return `<div class="groupe"><div class="groupe-etiquette">${i===0 ? "côté paternel" : "côté maternel"}</div>${carte(gpe)}${carte(gme)}</div>`;
+    }).join("") + `</div></div><div class="connecteur"></div>`;
+  }
+  if (ordonnes.length){
+    h += `<div class="rangee"><h3>Parents</h3><div class="groupes"><div class="groupe">${carte(pere)}${carte(mere)}</div></div></div><div class="connecteur"></div>`;
+  }
+  // centre
+  const cj = unions[k];
+  h += `<div class="rangee"><div class="centre-rang">${carte(k, "centre")}` + cj.map(fid => {
+    const f = F[fid], autre = (f.parents||[]).find(x => x !== k);
+    if (!autre) return "";
+    const mar = PRIVE && f.mariage && f.mariage.date ? `<span>${esc(an(f.mariage.date) || f.mariage.date)}</span>` : "";
+    return `<div class="union"><b>∞</b>${mar}</div>${carte(autre)}`;
+  }).join("") + `</div></div>`;
+  // enfants
+  const avecEnfants = cj.filter(fid => (F[fid].enfants||[]).length);
+  if (avecEnfants.length){
+    h += `<div class="connecteur"></div><div class="rangee"><h3>Enfants</h3><div class="groupes">` + avecEnfants.map(fid => {
+      const autre = (F[fid].parents||[]).find(x => x !== k);
+      const lbl = avecEnfants.length > 1 ? `<div class="groupe-etiquette">avec ${autre ? esc(nom(autre)) : "parent inconnu"}</div>` : "";
+      return `<div class="groupe">${lbl}${F[fid].enfants.map(e => carte(e)).join("")}</div>`;
+    }).join("") + `</div></div>`;
+  }
+  const fr = fratrieDe(k);
+  if (fr.length){
+    h += `<div class="rangee" style="margin-top:28px"><h3>Frères et sœurs</h3><div class="groupes"><div class="groupe">${fr.map(e => carte(e)).join("")}</div></div></div>`;
+  }
+  h += `</div>${panneau(k)}</div>`;
+  return h;
+}
+
+function evtLigne(lbl, e){
+  if (!e) return "";
+  const t = [fDate(e.date), e.lieu].filter(Boolean).join(" · ");
+  return `<dt>${esc(lbl)}</dt><dd>${esc(t || "sans date")}${e.description ? ` — ${esc(e.description)}` : ""}</dd>`;
+}
+const TYPES = {diplome:"Diplôme", debut_couple:"Début du couple", fiancailles:"Fiançailles", divorce:"Divorce", autre_12:"Événement", bapteme:"Baptême", naissance:"Naissance", deces:"Décès"};
+function panneau(k){
+  const p = P[k];
+  let h = `<aside class="panneau" aria-label="Fiche"><h2>${esc(nom(k))}</h2>`;
+  if (PRIVE){
+    const sous = [];
+    if (p.autres_prenoms) sous.push("aussi " + esc(p.autres_prenoms));
+    if (p._vivant === true) sous.push("vivant" + (fem(k) ? "e" : ""));
+    if (p._vivant === false) sous.push("décédé" + (fem(k) ? "e" : ""));
+    if (p._mineur) sous.push("mineur" + (fem(k) ? "e" : "") + " · masqué" + (fem(k) ? "e" : "") + " en public");
+    h += `<p class="sous">${sous.join(" · ")}</p><dl>`;
+    h += evtLigne(fem(k) ? "Née" : "Né", p.naissance) + evtLigne("Baptême", p.bapteme) + evtLigne(fem(k) ? "Décédée" : "Décédé", p.deces);
+    (p.evenements||[]).forEach(e => h += evtLigne(TYPES[e.type] || e.type, e));
+    unions[k].forEach(fid => {
+      const f = F[fid], autre = (f.parents||[]).find(x => x !== k);
+      if (f.mariage) h += evtLigne("Mariage" + (autre ? " avec " + nom(autre) : ""), f.mariage);
+      (f.evenements||[]).forEach(e => h += evtLigne((TYPES[e.type]||e.type) + (autre ? " avec " + nom(autre) : ""), e));
+    });
+    if (!p.naissance && !p.deces && p._annee) h += `<dt>Naissance</dt><dd>vers ${p._annee} (estimation)</dd>`;
+    h += `</dl>`;
+    if ((p.etiquettes||[]).length) h += `<h4>Étiquettes</h4>` + p.etiquettes.map(t => `<span class="puce">${esc(t)}</span>`).join("");
+    if ((p.notes||[]).length) h += `<h4>Notes</h4><ul>` + p.notes.map(n => `<li>${esc(n)}</li>`).join("") + `</ul>`;
+    const meds = [...(p.medias||[]), ...unions[k].flatMap(fid => F[fid].medias||[])].filter((m,i,a) => M[m] && a.indexOf(m) === i);
+    if (meds.length){
+      h += `<h4>Documents</h4><div class="medias">` + meds.map(m => {
+        const md = M[m];
+        const img = md.miniature ? `<img src="${esc(md.miniature)}" alt="" loading="lazy">` : "";
+        return md.fichier ? `<a href="${esc(md.fichier)}" target="_blank" rel="noopener">${img}${esc(md.titre||"Document")}</a>`
+                          : `<a title="fichier manquant">${img}${esc(md.titre||"Document")} (manquant)</a>`;
+      }).join("") + `</div>`;
+    }
+  } else {
+    const n = [parentsDe[k].length && `${parentsDe[k].length} parent(s)`, conjointsDe(k).length && `${conjointsDe(k).length} conjoint(s)`, enfantsDe(k).length && `${enfantsDe(k).length} enfant(s)`].filter(Boolean);
+    h += `<p class="sous">${n.join(" · ")}</p>`;
+  }
+  if (k !== DEPART && !masque(DEPART)){
+    const l = lien(DEPART, k);
+    h += `<div class="lienp">${esc(l.phrase)}</div>`;
+  }
+  h += `<h4>Explorer</h4><button class="btn" data-aller="ascendance" data-id="${k}">Ascendance</button> <button class="btn" data-aller="lien" data-id="${k}">Lien avec…</button>`;
+  return h + `</aside>`;
+}
+
+/* ---------- vue Ascendance ---------- */
+function vueAscendance(){
+  const G = nbGen, W = 200, gap = 34, hDer = 44, vgap = 8;
+  const slots = 2 ** (G-1), H = slots * (hDer + vgap);
+  const cartes = [], lignes = [];
+  function place(k, g, i){
+    const n = 2 ** g, h = Math.min(hDer + 22, H / n - vgap), y = (i + .5) * (H / n) - h/2, x = g * (W + gap);
+    const compact = h < 62 ? " compact" : "";
+    cartes.push(`<div style="left:${x}px;top:${y}px;width:${W}px;height:${h}px;position:absolute">${carte(k, (g === 0 ? "centre" : "") + compact).replace('class="carte', 'style="width:100%;height:100%;min-width:0;max-width:none;padding:4px 10px" class="carte')}</div>`);
+    if (!k || masque(k) || g === G-1) return {x, y, h};
+    const par = parentsDe[k];
+    const pe = par.find(x => P[x].sexe === "M") || null, me = par.find(x => P[x].sexe === "F") || null;
+    if (!pe && !me) return {x, y, h};
+    [pe, me].forEach((p, j) => {
+      if (!p) return;
+      const c = place(p, g+1, i*2+j);
+      const x1 = x + W, y1 = y + h/2, x2 = c.x, y2 = c.y + c.h/2, xm = x1 + gap/2;
+      lignes.push(`<path d="M${x1} ${y1} H${xm} V${y2} H${x2}" fill="none" stroke="var(--trait)" stroke-width="1.5"/>`);
+    });
+    return {x, y, h};
+  }
+  place(focus, 0, 0);
+  const largeur = G * (W + gap) - gap;
+  return `<div class="asc-outils"><span>Ascendance de <b>${esc(nom(focus))}</b></span>
+    <label>Générations <select id="nbgen">${[3,4,5,6,7].map(n => `<option ${n===G?"selected":""}>${n}</option>`).join("")}</select></label>
+    <span>Clique sur une personne pour remonter plus loin.</span></div>
+    <div class="asc-cadre"><div class="asc" style="width:${largeur}px;height:${H}px"><svg width="${largeur}" height="${H}">${lignes.join("")}</svg>${cartes.join("")}</div></div>`;
+}
+
+/* ---------- vue Lien ---------- */
+function vueLien(){
+  let h = `<div class="lien-form"><div><label>Personne A</label><div class="recherche" id="ra"></div></div><div style="text-align:center;padding-bottom:8px">et</div><div><label>Personne B</label><div class="recherche" id="rb"></div></div></div><div class="lien-res">`;
+  if (lienA && lienB){
+    const l = lien(lienA, lienB);
+    h += `<p class="lien-phrase">${esc(l.phrase)}</p>`;
+    if (l.sang){
+      const s = l.sang;
+      const sommet = s.ancs.map(x => carte(x)).join("");
+      const ch = c => c.slice(1).map(x => `<div class="connecteur"></div>${carte(x)}`).join("");
+      h += `<div class="sommet"><h3 class="note" style="margin:0 0 6px">Ancêtre${s.ancs.length>1?"s":""} commun${s.ancs.length>1?"s":""}</h3><div class="groupe">${sommet}</div></div>`;
+      if (s.a || s.b) h += `<div class="chemins">${s.a ? `<div class="chemin">${ch(s.cheminA)}</div>` : ""}${s.b ? `<div class="chemin">${ch(s.cheminB)}</div>` : ""}</div>`;
+    }
+  } else h += `<p class="note" style="text-align:center">Choisis deux personnes pour voir leur lien de parenté.</p>`;
+  return h + `</div>`;
+}
+
+/* ---------- vue Index ---------- */
+function vueIndex(){
+  const nbMasques = Object.keys(P).filter(masque).length;
+  return `<div class="idx-outils"><input id="filtre" type="search" placeholder="Filtrer par nom…" aria-label="Filtrer"><span class="note" id="compte"></span></div><div class="idx" id="idx"></div>
+    ${nbMasques ? `<p class="note">${nbMasques} personne(s) mineure(s) ne sont pas listées dans cette version.</p>` : ""}`;
+}
+function remplirIndex(q){
+  const t = norm(q).trim().split(/\s+/).filter(Boolean);
+  const ks = Object.keys(P).filter(k => !masque(k) && t.every(x => norm(nom(k)).includes(x)));
+  const par = {};
+  ks.forEach(k => { const n = (P[k].nom || "—").trim(); (par[n] = par[n] || []).push(k); });
+  const noms = Object.keys(par).sort((a,b) => a.localeCompare(b, "fr"));
+  document.getElementById("compte").textContent = `${ks.length} personne(s), ${noms.length} nom(s) de famille`;
+  document.getElementById("idx").innerHTML = noms.map(n => `<section><h3>${esc(n)} <small>${par[n].length}</small></h3>` +
+    par[n].sort((a,b) => (P[a].prenom||"").localeCompare(P[b].prenom||"", "fr")).map(k => `<button data-id="${k}">${esc(P[k].prenom || "?")} <span class="an">${esc(annees(k))}</span></button>`).join("") + `</section>`).join("");
+}
+
+/* ---------- rendu ---------- */
+function generations(k){ let g = 0, niv = [k]; while (niv.length){ g++; niv = niv.flatMap(x => parentsDe[x]); } return g; }
+function rendre(){
+  document.querySelectorAll("#nav button").forEach(b => b.setAttribute("aria-current", b.dataset.vue === vue));
+  const c = document.getElementById("contenu");
+  c.innerHTML = vue === "famille" ? vueFamille() : vue === "ascendance" ? vueAscendance() : vue === "lien" ? vueLien() : vueIndex();
+  if (vue === "lien"){
+    champRecherche("ra", "Rechercher une personne…", k => aller("lien", k, lienB), lienA ? nom(lienA) : "");
+    champRecherche("rb", "Rechercher une personne…", k => aller("lien", lienA, k), lienB ? nom(lienB) : "");
+  }
+  if (vue === "index"){ const f = document.getElementById("filtre"); f.addEventListener("input", () => remplirIndex(f.value)); remplirIndex(""); }
+  if (vue === "ascendance") document.getElementById("nbgen").addEventListener("change", e => { nbGen = +e.target.value; rendre(); });
+  document.title = (vue === "famille" || vue === "ascendance" ? nom(focus) + " · " : "") + ARBRE.meta.titre;
+}
+document.getElementById("contenu").addEventListener("click", e => {
+  const al = e.target.closest("[data-aller]");
+  if (al){ return al.dataset.aller === "lien" ? aller("lien", DEPART !== al.dataset.id && !masque(DEPART) ? DEPART : al.dataset.id, DEPART !== al.dataset.id && !masque(DEPART) ? al.dataset.id : null) : aller(al.dataset.aller, al.dataset.id); }
+  const b = e.target.closest("[data-id]");
+  if (b && !e.target.closest(".recherche")) aller(vue === "ascendance" ? "ascendance" : "famille", b.dataset.id);
+});
+document.getElementById("nav").addEventListener("click", e => { const b = e.target.closest("button"); if (b) aller(b.dataset.vue, b.dataset.vue === "lien" ? lienA : (b.dataset.vue === "index" ? null : focus), b.dataset.vue === "lien" ? lienB : null); });
+const accueil = () => aller("famille", DEPART);
+document.getElementById("titre").addEventListener("click", accueil);
+document.getElementById("titre").addEventListener("keydown", e => { if (e.key === "Enter") accueil(); });
+
+document.getElementById("titre-txt").textContent = ARBRE.meta.titre;
+document.getElementById("sous-titre").textContent = `${Object.keys(P).length} personnes · ${generations(DEPART)} générations`;
+if (PRIVE) document.getElementById("banniere").innerHTML = `<div class="prive-banniere">Version privée : contient des dates et des documents. Ne pas publier.</div>`;
+document.getElementById("pied").innerHTML = PRIVE ? "Version privée complète" : "Version publique : noms et liens de parenté seulement. Les noms des personnes mineures sont masqués.";
+champRecherche("recherche-entete", "Rechercher une personne…", k => aller(vue === "ascendance" ? "ascendance" : "famille", k));
+lireHash(); rendre();
+})();
+</script>
+</body>
+</html>
