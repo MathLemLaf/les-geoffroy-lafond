@@ -143,7 +143,7 @@ const MODE = "public";
 
 (function(){
 "use strict";
-const P = ARBRE.personnes, F = ARBRE.familles, M = ARBRE.medias || {};
+const P = ARBRE.personnes, F = ARBRE.familles, M = ARBRE.medias || {}, SRC = ARBRE.sources || {};
 const PRIVE = MODE === "prive";
 const DEPART = ARBRE.meta.personne_depart;
 
@@ -366,6 +366,7 @@ function panneau(k){
     h += `</dl>`;
     if ((p.etiquettes||[]).length) h += `<h4>Étiquettes</h4>` + p.etiquettes.map(t => `<span class="puce">${esc(t)}</span>`).join("");
     if ((p.notes||[]).length) h += `<h4>Notes</h4><ul>` + p.notes.map(n => `<li>${esc(n)}</li>`).join("") + `</ul>`;
+    if ((p.sources||[]).length) h += `<h4>Sources</h4><ul>` + p.sources.map(c => { const s = SRC[c.id] || {}; const t = s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.titre||c.id)}</a>` : esc(s.titre||c.id); return `<li>${t}${c.pour ? " — " + esc(c.pour) : ""} <span class="note">(${esc(s.confiance||"?")})</span></li>`; }).join("") + `</ul>`;
     const meds = [...(p.medias||[]), ...unions[k].flatMap(fid => F[fid].medias||[])].filter((m,i,a) => M[m] && a.indexOf(m) === i);
     if (meds.length){
       h += `<h4>Documents</h4><div class="medias">` + meds.map(m => {
